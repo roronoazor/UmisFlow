@@ -32,6 +32,9 @@ class UserDetailsView(APIView):
 
         if profile:
             serializer = ProfileSerializer(profile, data=request.data, partial=True)
+            if request.data.get('email'):
+                request.user.email = request.data.get('email')
+                request.user.save()
         else:
             profile = Profile()
             serializer = ProfileSerializer(profile, data=request.data, partial=True)
@@ -60,7 +63,16 @@ class SelectMealTypeView(APIView):
         return response.Response({"message": "success", "detail": data}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        pass
+        user_meal_types = UserMealTypes.objects.filter(user=request.user).delete()
+
+        ids = request.data.get('ids')
+        meal_types = MealTypes.objects.filter(id__in=ids)
+        for meal_type in meal_types:
+            UserMealType.objects.create(
+                meal_type=meal_type,
+                user=request.user
+            )
+        return response.Response({"message": "success"}, status=status.HTTP_200_OK)
 
 
 class SelectResidenceView(APIView):
@@ -81,7 +93,20 @@ class SelectResidenceView(APIView):
         return response.Response({"message": "success", "detail": data}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        pass
+        UsersResidence.objects.filter(user=request.user).delete()
+
+        residences  = Residence.objects.filter(id__in=request.data.get("ids"))
+
+        for residence in residences:
+            UserResidence.objects.create(
+                residence=residence,
+                user=request.user
+            )
+
+            available = residence.available_space or 0
+            residence.available_space = available - 1
+            residence.save()
+        return response.Response({"message": "success"}, status=status.HTTP_200_OK)
 
 
 class SelectWorshipCenterView(APIView):
@@ -103,7 +128,20 @@ class SelectWorshipCenterView(APIView):
 
 
     def post(self, request, *args, **kwargs):
-        pass
+        UsersWorshipCenter.objects.filter(user=request.user).delete()
+
+        worships = UsersWorshipCenter.objects.filter(id__in=request.data.get("ids"))
+
+        for worship in worships:
+            UsersWorshipCenter.objects.create(
+                worship_center=worship,
+                user=request.user
+            )
+
+            left = worship.space_left or 0
+            worship.space_left = left - 1
+            worship.save()
+        return response.Response({"message": "success"}, status=status.HTTP_200_OK)
 
 
 class SelectUserCoursesView(APIView):
@@ -111,9 +149,15 @@ class SelectUserCoursesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+
+        if not self.kwargs.get("id") or self.kwargs.get("id") == 9999:
+            # get the latest semester for the user
+            latest_semester = UserSemester.objects.filter(user=request.user).order_by('-id').first()
+            latest_semester_id = latest_semester.id or 9999
+
         courses = UsersCourses.objects.filter(
             user=request.user,
-            semester=self.kwargs.get("id")
+            semester=self.kwargs.get("id", latest_semester_id)
             )
         courses_serializer = UserCoursesSerializer(courses, many=True)
 

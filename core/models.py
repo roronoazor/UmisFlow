@@ -107,6 +107,9 @@ class UsersCourses(models.Model):
     space_left = models.IntegerField(blank=True, null=True)
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return "%s %s %s" % (self.user.first_name, self.user.last_name, self.course.course_title)
+
 
 class UsersResidence(models.Model):
     residence = models.ForeignKey(Residence, on_delete=models.CASCADE, blank=True, null=True)
