@@ -63,12 +63,12 @@ class SelectMealTypeView(APIView):
         return response.Response({"message": "success", "detail": data}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        user_meal_types = UserMealTypes.objects.filter(user=request.user).delete()
+        user_meal_types = UsersMealType.objects.filter(user=request.user).delete()
 
         ids = request.data.get('ids')
-        meal_types = MealTypes.objects.filter(id__in=ids)
+        meal_types = MealType.objects.filter(id__in=ids)
         for meal_type in meal_types:
-            UserMealType.objects.create(
+            UsersMealType.objects.create(
                 meal_type=meal_type,
                 user=request.user
             )
@@ -98,7 +98,7 @@ class SelectResidenceView(APIView):
         residences  = Residence.objects.filter(id__in=request.data.get("ids"))
 
         for residence in residences:
-            UserResidence.objects.create(
+            UsersResidence.objects.create(
                 residence=residence,
                 user=request.user
             )
@@ -130,7 +130,7 @@ class SelectWorshipCenterView(APIView):
     def post(self, request, *args, **kwargs):
         UsersWorshipCenter.objects.filter(user=request.user).delete()
 
-        worships = UsersWorshipCenter.objects.filter(id__in=request.data.get("ids"))
+        worships = WorshipCenter.objects.filter(id__in=request.data.get("ids"))
 
         for worship in worships:
             UsersWorshipCenter.objects.create(
