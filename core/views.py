@@ -194,7 +194,40 @@ class SubmitRegistrationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        pass
+        data = dict()
+
+        profile = Profile.objects.filter(user=request.user).first()
+
+        if not profile:
+           profile = Profile()
+
+        user_meal_type = UsersMealType.objects.filter(
+            user=request.user
+        ).first()
+
+        user_residence = UsersResidence.objects.filter(
+            user=request.user
+        ).first()
+           
+        data["semester"] = "2022/2023"
+        data["matric_no"] = profile.matric_no
+        data["student_name"] = "%s %s" % (request.user.first_name, request.user.last_name)
+        data["school"] = profile.school_details
+        data["study_level"] = profile.study_level
+        data["selected_meal"] = user_meal_type.meal_type.selection if user_meal_type else ""
+        data["selected_resident"] = user_residence.residence.residence_name if user_residence else ""
+        data["off_campus"] = profile.off_campus
+        data["financial_approval"] = "Yes"
+        data["completed_registration"] = profile.completed_registration
+        data["selected_credit_hours"] = 25
+
+        return response.Response({"message": "success", "detail": data}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        pass
+        
+        profile = Profile.objects.filter(user=request.user).first()
+        profile.completed_registration = True
+        profile.save()
+        
+        return response.Response({"message": "success"}, status=status.HTTP_200_OK)
+

@@ -8,4 +8,5 @@ urlpatterns = [
     path("user_worship_centers/", SelectWorshipCenterView.as_view(), name="user_worship_centers"),
     path("user_semesters/", SemesterView.as_view(), name="user_semesters"),
     path("user_semester_courses/<int:id>/", SelectUserCoursesView.as_view(), name="user_semesters_courses"),
+    path("submit_registration/", SubmitRegistrationView.as_view(), name="submit_registration"),
 ]
