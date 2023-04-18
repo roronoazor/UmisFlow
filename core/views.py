@@ -154,6 +154,8 @@ class SelectUserCoursesView(APIView):
             # get the latest semester for the user
             latest_semester = UserSemester.objects.filter(user=request.user).order_by('-id').first()
             latest_semester_id = latest_semester.id or 9999
+        else:
+            latest_semester_id = self.kwargs.get("id")
 
         courses = UsersCourses.objects.filter(
             user=request.user,
@@ -184,3 +186,15 @@ class SemesterView(APIView):
             "semester": semesters_serializer.data
         }
         return response.Response({"message": "success", "detail": data}, status=status.HTTP_200_OK)
+
+
+class SubmitRegistrationView(APIView):
+
+    authentication_classes = [BearerTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        pass
+
+    def post(self, request, *args, **kwargs):
+        pass
